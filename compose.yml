@@ -1,0 +1,29 @@
+services:
+
+  backend:
+    build:
+      context: ./app/backend
+    image: cloudforge-backend:1.0.0
+    container_name: cloudforge-backend
+    ports:
+      - "5000:5000"
+    environment:
+      MONGO_URI: mongodb://host.docker.internal:27017/cloudforge
+    networks:
+      - cloudforge-network
+
+  frontend:
+    build:
+      context: ./app/frontend
+    image: cloudforge-frontend:1.0.0
+    container_name: cloudforge-frontend
+    ports:
+      - "8080:80"
+    depends_on:
+      - backend
+    networks:
+      - cloudforge-network
+
+networks:
+  cloudforge-network:
+    driver: bridge
