@@ -35,6 +35,18 @@ const applicationSchema = new mongoose.Schema(
             type: Date
         },
 
+        monitor: {
+            type: String,
+            enum: ["none", "demo"],
+            default: "none"
+        },
+        lastCheckedAt: Date,
+        healthHistory: [{
+            _id: false,
+            checkedAt: Date,
+            status: { type: String, enum: ["healthy", "unhealthy"] },
+            version: String
+        }],
         healthStatus: {
             type: String,
             enum: ["healthy", "unhealthy", "unknown"],

@@ -4,9 +4,11 @@ WORKDIR /app
 
 COPY package*.json ./
 
-RUN npm ci
+RUN npm ci --omit=dev
 
 COPY src ./src
+
+USER node
 
 EXPOSE 5000
 

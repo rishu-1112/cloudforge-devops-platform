@@ -1,8 +1,9 @@
 const Application = require("../models/Application");
+const { isObjectIdOrHexString } = require("mongoose");
 
 const getApplications = async (req, res) => {
     try {
-        const applications = await Application.find();
+        const applications = await Application.find().sort({ createdAt: -1 }).select("-healthHistory");
 
         res.status(200).json({
             success: true,
@@ -24,20 +25,25 @@ const createApplication = async (req, res) => {
         const {
             name,
             version,
-            environment
-        } = req.body;
+            environment,
+            monitor = "none"
+        } = req.body ?? {};
 
-        if (!name || !version || !environment) {
+        if (typeof name !== "string" || !name.trim() || name.length > 100 ||
+            typeof version !== "string" || !version.trim() || version.length > 50 ||
+            !["development", "staging", "production"].includes(environment) ||
+            !["none", "demo"].includes(monitor)) {
             return res.status(400).json({
                 success: false,
-                message: "name, version and environment are required"
+                message: "Enter a valid name, version, environment and monitoring target."
             });
         }
 
         const application = await Application.create({
             name,
-            version,
-            environment
+            version: version.trim(),
+            environment,
+            monitor
         });
 
         res.status(201).json({
@@ -55,6 +61,9 @@ const createApplication = async (req, res) => {
 };
 
 const getApplicationById = async (req, res) => {
+    if (!isObjectIdOrHexString(req.params.id)) {
+        return res.status(400).json({ success: false, message: "Invalid application ID." });
+    }
     try {
         const application = await Application.findById(req.params.id);
 
